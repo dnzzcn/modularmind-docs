@@ -18,8 +18,8 @@ graph LR
     A[External System] -->|HTTP POST| B[Maia Webhook URL]
     B --> C[Trigger Workflow]
     C --> D[Process with AI]
-    D --> E[Return Response]
-    E -->|JSON/Multipart| A
+    D --> E[Stream Response]
+    E -->|SSE Events| A
 ```
 
 ### Basic Flow
@@ -52,15 +52,15 @@ graph LR
     - Use actions
   </Step>
   
-  <Step title="Return Response">
-    Maia sends back a result
-    
-    ```json
-    {
-      "status": "success",
-      "lead_score": 85,
-      "recommendation": "High priority - schedule demo ASAP"
-    }
+  <Step title="Stream Response">
+    Maia streams back the result via SSE events
+
+    ```
+    event: response
+    data: {"status":200,"contentType":"application/json","body":"{\"lead_score\":85,\"recommendation\":\"High priority - schedule demo ASAP\"}"}
+
+    event: done
+    data: {}
     ```
   </Step>
 </Steps>
@@ -87,7 +87,7 @@ Maia provides webhook URL: https://hooks.modularmind.app/hooks/L3wKjb7iEMFTwMJFZ
 ```
 
 **Usage:**
-Your website form submits to this URL, and within minutes gets back:
+Your website form submits to this URL and receives an SSE stream. Once complete, the parsed response body contains:
 ```json
 {
   "lead_id": "CRM_12345",
@@ -254,22 +254,117 @@ If you don't enable **"Respond to webhook with data"**, Maia returns immediately
 
 The workflow executes asynchronously, but the caller doesn't wait for results.
 
-### Custom Data Response
+### Custom Data Response (SSE Streaming)
 
-Enable **"Respond to webhook with data"** to return workflow outputs back to the caller.
+Enable **"Respond to webhook with data"** to return workflow outputs back to the caller via **Server-Sent Events (SSE)**.
 
 <Frame> <img src="/images/create_a_webhook_for_your_workflow.jpg" alt="Webhook response configuration" className="my-6 rounded-lg border border-zinc-300 dark:border-zinc-600"  /></Frame>
 
 When enabled, you define **Body Parameters** — exactly like configuring [Custom Actions](/integrations/custom-actions). This tells Maia what data to include in the response.
 
+<Note>
+  Maia uses SSE streaming instead of a standard JSON response. This keeps the connection alive while the workflow executes, preventing timeouts on long-running workflows.
+</Note>
+
+#### Connection Protocol
+
+When a webhook with response data enabled receives a request, the connection follows this lifecycle:
+
+<Steps>
+  <Step title="SSE Connection Established">
+    The server responds with `200 OK` and SSE headers:
+    ```
+    Content-Type: text/event-stream
+    Cache-Control: no-cache
+    Connection: keep-alive
+    ```
+  </Step>
+
+  <Step title="Heartbeats During Processing">
+    While the workflow executes, the server sends periodic heartbeat comments every 15 seconds to keep the connection alive:
+    ```
+    : heartbeat
+    ```
+    These are SSE comments and should be ignored by your client.
+  </Step>
+
+  <Step title="Response Event">
+    When the workflow completes, the server sends a `response` event containing the result:
+    ```
+    event: response
+    data: {"status":200,"contentType":"application/json","body":"{...}"}
+    ```
+
+    For text-based responses (`application/json`, `text/*`), the `body` field contains the raw string. For binary responses (images, PDFs, ZIPs), the `body` is base64-encoded and an `encoding: "base64"` field is included.
+  </Step>
+
+  <Step title="Done Event">
+    A `done` event signals the stream is complete:
+    ```
+    event: done
+    data: {}
+    ```
+    The connection closes after this event.
+  </Step>
+</Steps>
+
+#### Error Handling
+
+If the workflow fails to trigger, the server sends an `error` event instead:
+```
+event: error
+data: {"type":"workflow_trigger_failed","message":"Failed to trigger workflow execution."}
+```
+
+#### Client Implementation Example
+
+```javascript
+const eventSource = new EventSource('https://hooks.modularmind.app/hooks/your_hook_id', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: 'john@example.com' })
+});
+
+// Note: EventSource only supports GET requests.
+// For POST requests, use fetch with a manual SSE parser:
+
+const response = await fetch('https://hooks.modularmind.app/hooks/your_hook_id', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: 'john@example.com' })
+});
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+
+  const text = decoder.decode(value);
+  const lines = text.split('\n');
+
+  for (const line of lines) {
+    if (line.startsWith('event: ')) {
+      const eventName = line.slice(7);
+      // Next data: line contains the payload
+    }
+    if (line.startsWith('data: ')) {
+      const data = JSON.parse(line.slice(6));
+      // Handle event data
+    }
+  }
+}
+```
+
 #### Supported Response Types
 
 Maia can return:
-- **Text data in JSON format** (structured responses)
-- **Images** (JPEG, PNG)
-- **Text files**
-- **PDFs**
-- **ZIP files**
+- **Text data in JSON format** (structured responses) — delivered as-is in the `body` field
+- **Images** (JPEG, PNG) — base64-encoded in the `body` field with `encoding: "base64"`
+- **Text files** — delivered as-is in the `body` field
+- **PDFs** — base64-encoded in the `body` field with `encoding: "base64"`
+- **ZIP files** — base64-encoded in the `body` field with `encoding: "base64"`
 
 Data, including files, can be generated throughout the workflow or downloaded from external sources.
 
@@ -305,7 +400,20 @@ Body Parameters:
   Description: Recommended follow-up action for the sales team
 ```
 
-**Returned Response:**
+**SSE Stream:**
+```
+: heartbeat
+
+: heartbeat
+
+event: response
+data: {"status":200,"contentType":"application/json","body":"{\"lead_id\":\"CRM_54321\",\"score\":88,\"priority\":\"hot\",\"next_action\":\"Schedule demo within 24 hours\"}"}
+
+event: done
+data: {}
+```
+
+**Parsed Response Body:**
 ```json
 {
   "lead_id": "CRM_54321",
@@ -328,7 +436,22 @@ Body Parameters:
   Description: Brief text summary of the report contents
 ```
 
-**Returned Response:**
+**SSE Stream:**
+```
+: heartbeat
+
+: heartbeat
+
+: heartbeat
+
+event: response
+data: {"status":200,"contentType":"application/json","body":"{\"report_pdf\":\"base64EncodedPdfData...\",\"summary\":\"Q4 2025 Sales Report - 23% growth, top performer: Enterprise segment\"}","encoding":"base64"}
+
+event: done
+data: {}
+```
+
+**Parsed Response Body:**
 ```json
 {
   "report_pdf": "base64EncodedPdfData...",
@@ -358,12 +481,21 @@ Body Parameters:
 }
 ```
 
-**Response to caller:**
+**SSE stream received by caller:**
+```
+: heartbeat
+
+event: response
+data: {"status":200,"contentType":"application/json","body":"{\"response\":\"We offer a 30-day money-back guarantee on all plans. If you're not satisfied, contact support@company.com for a full refund.\",\"confidence\":0.92,\"escalate\":false,\"source\":\"Help Center: Refund Policy\"}"}
+
+event: done
+data: {}
+```
+
+**Parsed response body:**
 ```json
 {
-  "response": "We offer a 30-day money-back guarantee on all 
-               plans. If you're not satisfied, contact 
-               support@company.com for a full refund.",
+  "response": "We offer a 30-day money-back guarantee on all plans...",
   "confidence": 0.92,
   "escalate": false,
   "source": "Help Center: Refund Policy"
@@ -393,7 +525,20 @@ Body Parameters:
 }
 ```
 
-**Response to caller:**
+**SSE stream received by caller:**
+```
+: heartbeat
+
+: heartbeat
+
+event: response
+data: {"status":200,"contentType":"application/json","body":"{\"status\":\"processed\",\"invoice_number\":\"12345\",\"vendor\":\"ABC Supplier\",\"amount\":3250.00,\"due_date\":\"2026-01-15\",\"accounting_id\":\"INV_789\",\"approval_required\":false,\"line_items\":[{\"description\":\"Widget A\",\"quantity\":100,\"price\":25.00},{\"description\":\"Widget B\",\"quantity\":50,\"price\":15.00}]}"}
+
+event: done
+data: {}
+```
+
+**Parsed response body:**
 ```json
 {
   "status": "processed",
@@ -438,7 +583,18 @@ Body Parameters:
 }
 ```
 
-**Response to caller:**
+**SSE stream received by caller:**
+```
+: heartbeat
+
+event: response
+data: {"status":200,"contentType":"application/json","body":"{\"approved\":true,\"spam_score\":0.05,\"sentiment\":\"positive\",\"themes\":{\"product_quality\":\"positive\",\"customer_support\":\"positive\",\"shipping_speed\":\"negative\"},\"action_items\":[{\"type\":\"feedback\",\"category\":\"shipping\",\"message\":\"Customer experienced slow shipping\"}],\"published_url\":\"https://site.com/reviews/rev_123\"}"}
+
+event: done
+data: {}
+```
+
+**Parsed response body:**
 ```json
 {
   "approved": true,
