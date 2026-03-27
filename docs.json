@@ -63,6 +63,7 @@
               "capabilities/document-generation",
               "capabilities/website-app-generation",
               "capabilities/data-analysis",
+              "capabilities/image-generation",
               "capabilities/agent-skills"
             ]
           },
