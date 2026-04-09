@@ -71,6 +71,7 @@
             "group": "Connections & Actions",
             "pages": [
               "integrations/native-connections",
+              "integrations/data-sources",
               "integrations/intelligent-actions",
               "integrations/custom-actions"
             ]
