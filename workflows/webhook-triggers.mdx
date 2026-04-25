@@ -1,17 +1,17 @@
 ---
-title: 'Webhooks: Maia as a Backend'
-description: 'Triggering workflows from external events and returning intelligent responses'
+title: 'Webhook Triggers'
+description: 'Trigger deployed workflows from external events and return intelligent responses'
 ---
 
 ## Event-Driven Automation
 
-Webhooks turn Maia workflows into **intelligent APIs** that respond to external events — form submissions, payment notifications, chat messages, and more.
+Webhook triggers turn deployed workflows into **intelligent APIs** that respond to external events — form submissions, payment notifications, chat messages, and more.
 
 <Note>
-  With webhooks, Maia becomes a **serverless backend** that processes inbound requests with AI-powered logic and returns structured responses.
+  With webhook triggers, Maia becomes a **serverless backend** that processes inbound requests with AI-powered logic and returns structured responses.
 </Note>
 
-## How Webhooks Work
+## How Webhook Triggers Work
 
 ```mermaid
 graph LR
@@ -25,8 +25,8 @@ graph LR
 ### Basic Flow
 
 <Steps>
-  <Step title="Create Webhook">
-    Deploy a workflow with webhook trigger
+  <Step title="Add Webhook Trigger">
+    From your deployed workflow's detail page, click the **Add Trigger** button and select **Webhook**.
     
     Maia generates a unique URL:
     ```
@@ -38,7 +38,7 @@ graph LR
     Another system sends data to your webhook URL
     
     ```bash
-    curl -X POST https://webhooks.maia.app/wh_abc123xyz \
+    curl -X POST https://hooks.modularmind.app/hooks/0nMMaZgKjmOirqosc8ohkeCuw9cV \
       -H "Content-Type: application/json" \
       -d '{"email": "john@example.com", "message": "Interested in demo"}'
     ```
@@ -81,9 +81,9 @@ graph LR
 6. Return lead score and priority
 ```
 
-**Deployment:**
+**Webhook URL:**
 ```
-Maia provides webhook URL: https://hooks.modularmind.app/hooks/L3wKjb7iEMFTwMJFZsroWsSoc731
+Maia provides: https://hooks.modularmind.app/hooks/L3wKjb7iEMFTwMJFZsroWsSoc731
 ```
 
 **Usage:**
@@ -220,7 +220,7 @@ Send any data format, and Maia figures it out:
 
 ## Outbound Response: Controlling What Gets Returned
 
-When deploying a webhook, you choose how Maia responds to incoming requests.
+When adding a webhook trigger, you choose how Maia responds to incoming requests.
 
 ### Default Response (Immediate)
 
@@ -268,7 +268,7 @@ When enabled, you define **Body Parameters** — exactly like configuring [Custo
 
 #### Connection Protocol
 
-When a webhook with response data enabled receives a request, the connection follows this lifecycle:
+When a webhook trigger with response data enabled receives a request, the connection follows this lifecycle:
 
 <Steps>
   <Step title="SSE Connection Established">

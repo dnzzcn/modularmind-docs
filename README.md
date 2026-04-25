@@ -29,14 +29,14 @@ Connect Maia to your favorite tools and services:
 - **[Intelligent Actions](integrations/intelligent-actions.mdx)** - Smart automation workflows
 - **[Custom Actions](integrations/custom-actions.mdx)** - Build your own integrations
 
-## 🚢 Deployment
+## 🚢 Workflows
 
-Deploy your Maia solutions:
+Deploy and automate your Maia workflows:
 
-- **[Cloud Deployment](deployment/cloud-deployment.mdx)** - Deploy to the cloud
-- **[Maia Apps](deployment/maia-apps.mdx)** - Create standalone applications
-- **[Scheduled Deployments](deployment/scheduled-deployments.mdx)** - Automate recurring tasks
-- **[Webhooks](deployment/webhooks.mdx)** - Integrate with external systems
+- **[Deployed Workflows](workflows/deployed-workflows.mdx)** - Deploy workflows with flexible triggers
+- **[Routine Triggers](workflows/routine-triggers.mdx)** - Run workflows on a recurring schedule
+- **[Action Triggers](workflows/action-triggers.mdx)** - Turn workflows into reusable building blocks
+- **[Webhook Triggers](workflows/webhook-triggers.mdx)** - Trigger workflows from external events
 
 ## 📋 Planning & Configuration
 

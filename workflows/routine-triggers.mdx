@@ -1,18 +1,18 @@
 ---
-title: 'Scheduled Deployments'
-description: 'Setting up recurring workflows with scheduling'
+title: 'Routine Triggers'
+description: 'Run deployed workflows on a recurring schedule'
 ---
 
 ## Turn Tasks into Routines
 
-Scheduled deployments let you run workflows at specific times without manual intervention — hourly, daily, weekly or monthly, with custom schedules.
+Routine triggers let you run deployed workflows at specific times without manual intervention — hourly, daily, weekly, or monthly. A single workflow can have multiple routine triggers, alongside webhook and action triggers.
 
-## Setting Up a Schedule
+## Setting Up a Routine Trigger
 
-When deploying a workflow, navigate to the **Schedule Your Workflow** section to configure automatic execution at your preferred intervals.
+From your deployed workflow's detail page, click the **Add Trigger** button and select **Routine** to configure automatic execution at your preferred intervals.
 
 <Frame>
-  <img src="/images/schedule_your_workflow.jpg" alt="Deployment options panel" className="my-6 rounded-lg" />
+  <img src="/images/schedule_your_workflow.jpg" alt="Routine trigger settings" className="my-6 rounded-lg" />
 </Frame>
 
 ### Scheduling Options
@@ -22,14 +22,14 @@ When deploying a workflow, navigate to the **Schedule Your Workflow** section to
     Triggers every hour at your chosen minute offset. Perfect for real-time monitoring tasks, frequent data updates, or time-sensitive automations that need to run throughout the day.
     
     **Configuration:**
-    - Select minute offset: 0, 15, 30, or 45 minutes past the hour
+    - Select minute offset (0–59 minutes past the hour)
   </Accordion>
 
   <Accordion title="Every Day" icon="calendar-day">
     Triggers once per day at your specified time. Ideal for daily reports, routine maintenance tasks, or regular content updates. 
     
     **Configuration:**
-    - Select the time of day (e.g., 12:00 AM) when the workflow should execute
+    - Select the time of day when the workflow should execute
   </Accordion>
 
   <Accordion title="Every Week" icon="calendar-week">
@@ -48,6 +48,15 @@ When deploying a workflow, navigate to the **Schedule Your Workflow** section to
     - Choose the hour to trigger execution
   </Accordion>
 </AccordionGroup>
+
+## Multiple Triggers on One Workflow
+
+You can attach multiple routine triggers to a single deployed workflow. For example, a reporting workflow could have:
+- A **daily** trigger for quick summary reports at 9 AM
+- A **weekly** trigger for detailed analysis every Monday at 8 AM
+- A **monthly** trigger for comprehensive reviews on the 1st
+
+Each trigger runs independently. The workflow's execution logs show which trigger initiated each run.
 
 ## Use Cases
 
@@ -85,14 +94,14 @@ When deploying a workflow, navigate to the **Schedule Your Workflow** section to
   </Step>
   
   <Step title="Monitor Performance">
-    Check your scheduled workflow runs regularly to ensure they're running successfully and producing expected results.
+    Check your workflow runs regularly to ensure they're executing successfully and producing expected results.
   </Step>
 </Steps>
 
 <Tip>
-  You can pause or modify schedules at any time from your deployment settings without having to redeploy the entire workflow.
+  You can pause or modify routine triggers at any time from your deployed workflow's settings without having to redeploy the entire workflow.
 </Tip>
 
-<Card title="Next: Webhooks" icon="webhook" href="/deployment/webhooks">
+<Card title="Next: Webhook Triggers" icon="webhook" href="/workflows/webhook-triggers">
   Learn how to trigger workflows from external events
 </Card>

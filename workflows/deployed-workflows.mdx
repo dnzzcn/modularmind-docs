@@ -1,6 +1,6 @@
 ---
-title: 'Running on the Cloud'
-description: 'Deploy workflows to run automatically without manual oversight'
+title: 'Deployed Workflows'
+description: 'Deploy workflows to run automatically with flexible triggers'
 ---
 
 ## From Chat to Automation
@@ -8,10 +8,10 @@ description: 'Deploy workflows to run automatically without manual oversight'
 Once you've perfected a workflow by watching it run, you can **deploy it to the cloud** to run automatically — no need to keep Maia open or manually trigger execution.
 
 <Note>
-  Cloud deployment transforms one-off tasks into **business processes** that run reliably on schedule or on-demand.
+  Deploying a workflow transforms a one-off task into a **persistent, reusable process** that can be triggered on a schedule, by an external event, or called by Maia itself as part of a larger plan.
 </Note>
 
-## Running Workflows Inside the Sessions vs. Deployed
+## Running Workflows Inside Sessions vs. Deployed
 
 The interface remains the same whether you're actively working with Maia or reviewing automated runs. The difference is in how and when workflows execute.
 
@@ -38,14 +38,15 @@ You watch it run, review results, maybe tweak and re-run.
 ### Deployed Workflows
 
 **What it means:**
-- Workflow runs automatically on schedule or trigger
+- Workflow runs automatically based on one or more triggers
 - No manual initiation required
-- You can open any deployment to see execution details
+- You can open any deployed workflow to see execution details
 - Results saved in your workspace to access anytime
 
 **Best for:**
 - Recurring tasks (daily, weekly, monthly)
 - Event-triggered actions (when X happens, do Y)
+- Modular building blocks for Maia to use across plans
 - Background data processing
 - Scaling operations
 
@@ -54,7 +55,27 @@ You watch it run, review results, maybe tweak and re-run.
 Deploy the "competitor pricing check" workflow to run 
 every Monday at 9 AM and send results to #marketing-channel
 ```
-Once you deploy the workflow, it runs automatically every week. You can open the deployment anytime to see execution details and results.
+Once deployed, the workflow runs automatically every week. You can open it anytime to see execution details and results.
+
+## One Workflow, Multiple Triggers
+
+Every deployed workflow can be triggered from multiple sources simultaneously. You assign **triggers** to control when and how a workflow runs:
+
+<CardGroup cols={3}>
+  <Card title="Routine Triggers" icon="clock" href="/workflows/routine-triggers">
+    Run on a schedule — hourly, daily, weekly, or monthly
+  </Card>
+
+  <Card title="Webhook Triggers" icon="webhook" href="/workflows/webhook-triggers">
+    Trigger via HTTP requests from external systems
+  </Card>
+
+  <Card title="Action Triggers" icon="bolt" href="/workflows/action-triggers">
+    Let Maia call the workflow as a reusable action within larger plans
+  </Card>
+</CardGroup>
+
+A single workflow can have any combination of these triggers active at the same time. For example, a lead scoring workflow could run on a daily schedule, accept webhook calls from your website, and be available as an action Maia uses inside a larger lead generation pipeline — all simultaneously.
 
 ## Deploying a Workflow
 
@@ -62,7 +83,7 @@ There are two ways to deploy a workflow:
 
 ### Method 1: Deploy via Chat
 
-Simply tell Maia you want to deploy your workflow, and Maia will suggest the appropriate deployment type with options.
+Simply tell Maia you want to deploy your workflow, and Maia will suggest the appropriate trigger type with options.
 
 **Example:**
 ```
@@ -70,7 +91,7 @@ Simply tell Maia you want to deploy your workflow, and Maia will suggest the app
 ```
 
 Maia will present an interactive suggestion in the chat with:
-- Recommended deployment type (scheduled or webhook)
+- Recommended trigger type (routine, webhook, or action)
 - Pre-configured options based on your request
 - A **Deploy** button to review and confirm settings
 
@@ -86,41 +107,46 @@ Use the **Deploy workflow** button in the top-right corner of the workflow board
 
 **Steps:**
 1. Click the **Deploy workflow** button in the top-right corner
-2. The deployment options panel opens on the right side of the page
-3. Choose your deployment method:
-   - **Schedule** - Run automatically at specific times or intervals
-   - **Create a Webhook** - Trigger via external applications
-   - **Create a Trigger** - Run based on specific events or conditions (coming soon)
-   - **Create an Action** - Create a custom action from your workflow for Maia (coming soon)
-   - **Create a Form** - Collect data and trigger workflow based on submissions (coming soon)
+2. Review the workflow details and click **Deploy** to activate
+3. Once deployed, add triggers to control how the workflow runs:
+   - **Enable the Action trigger** to make the workflow available as a reusable action for Maia
+   - **Use the Add Trigger button** to attach routine (scheduled) or webhook triggers
+4. Configure each trigger's settings and enable it
 
 <Frame>
   <img src="/images/deployment_options.jpg" alt="Deployment options panel" className="my-6 rounded-lg" />
 </Frame>
 
-4. Configure the selected deployment type's settings
-5. Click **Deploy** to activate
+## Managing Triggers
 
-## Deployment Limits by Plan
+Once deployed, you can manage all triggers from the deployed workflow's detail page:
 
-| Plan Tier | Active Deployments |
-|-----------|-------------------|
-| **Free Plan** | 3 deployments |
+- **Add triggers** — Attach additional routine or webhook triggers, or enable the action trigger
+- **Enable/Disable** — Toggle individual triggers on or off without removing them
+- **Edit** — Modify trigger settings (schedule, response configuration, etc.)
+- **Delete** — Remove triggers you no longer need
+- **Run manually** — Execute the workflow on demand at any time
+
+## Workflow Limits by Plan
+
+| Plan Tier | Active Workflows |
+|-----------|-----------------|
+| **Free Plan** | 3 workflows |
 | **Plus & Pro Plans** | Unlimited |
 
 <Tip>
-  A "deployment" is a unique workflow configuration. Running the same workflow multiple times (e.g., daily) counts as **one** deployment.
+  A "workflow" is a unique deployed workflow configuration. Adding multiple triggers to the same workflow still counts as **one** workflow toward your limit.
 </Tip>
 
-## Real-World Deployment Examples
+## Real-World Examples
 
 ### Example 1: Daily Competitor Monitoring
 
 **Workflow:** Check 10 competitor websites for pricing changes
 
-**Deployment:**
+**Triggers:**
 ```yaml
-Schedule: Daily at 8 AM (Mon-Fri)
+Routine: Daily at 8 AM (Mon-Fri)
 Execution: Scrape pricing pages, compare to previous day
 Delivery:
   - If changes detected:
@@ -135,11 +161,12 @@ Delivery:
 
 **Workflow:** Process new leads from Google Form submissions
 
-**Deployment:**
+**Triggers:**
 ```yaml
-Schedule: Every Monday at 9 AM
+Routine: Every Monday at 9 AM
+Webhook: Receives form submissions in real-time
 Execution:
-  1. Read form responses from past week
+  1. Read form responses from past week (routine) or process incoming lead (webhook)
   2. For each lead, research company (web + LinkedIn)
   3. Enrich with: industry, size, tech stack
   4. Add to CRM with enriched data
@@ -155,9 +182,9 @@ Delivery:
 
 **Workflow:** Generate comprehensive financial report
 
-**Deployment:**
+**Triggers:**
 ```yaml
-Schedule: 1st of every month at 6 AM
+Routine: 1st of every month at 6 AM
 Execution:
   1. Pull data from accounting software API
   2. Calculate key metrics (revenue, expenses, profit, growth %)
@@ -172,7 +199,7 @@ Delivery:
 
 ## Execution Logs
 
-Every cloud deployment maintains workflow run logs:
+Every deployed workflow maintains run logs:
 
 ### What's Logged
 
@@ -181,13 +208,14 @@ Every cloud deployment maintains workflow run logs:
 - **Steps completed**: Which actions ran successfully
 - **Errors**: Any failures or issues
 - **Results**: Summary of what was produced and what actions were taken
+- **Trigger**: Which trigger initiated the run (routine, webhook, action, or manual)
 
-<Frame> <img src="/images/deployment_runs.jpg" alt="Edit modular prompt sections" className="my-6 rounded-lg border border-zinc-300 dark:border-zinc-600" /></Frame>
+<Frame> <img src="/images/deployment_runs.jpg" alt="Workflow execution logs" className="my-6 rounded-lg border border-zinc-300 dark:border-zinc-600" /></Frame>
 
 <br/>
 <br/>
 <br/>
 
-<Card title="Next: Scheduled Automations" icon="clock" href="/deployment/scheduled-deployments">
-  Deep dive into setting up recurring workflows
+<Card title="Next: Routine Triggers" icon="clock" href="/workflows/routine-triggers">
+  Set up recurring workflows with flexible scheduling
 </Card>

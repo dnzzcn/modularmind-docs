@@ -77,11 +77,12 @@
             ]
           },
           {
-            "group": "Deployment & Automation",
+            "group": "Workflows",
             "pages": [
-              "deployment/cloud-deployment",
-              "deployment/scheduled-deployments",
-              "deployment/webhooks"
+              "workflows/deployed-workflows",
+              "workflows/routine-triggers",
+              "workflows/action-triggers",
+              "workflows/webhook-triggers"
             ]
           },
           {
